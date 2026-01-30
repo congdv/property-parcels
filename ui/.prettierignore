@@ -1,0 +1,6 @@
+# Prettier ignore file
+# Add files and folders here to exclude them from formatting
+node_modules
+build
+dist
+coverage
