@@ -16,9 +16,6 @@ const Header: React.FC = () => {
     auth.removeUser();
   };
 
-
-
-
   return (
     <AppBar position="static" sx={{ backgroundColor: '#6EC1E4', boxShadow: 'none' }}>
       <Toolbar>

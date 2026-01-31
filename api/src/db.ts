@@ -8,6 +8,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || 'property_parcels',
   user: process.env.DB_USER || 'user',
   password: process.env.DB_PASSWORD || 'password',
+  options: '-c search_path=public,topology'
 })
 
 export default pool

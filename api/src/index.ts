@@ -1,45 +1,30 @@
+import './env';
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+import parcelRoutes from './routes/parcels';
 
-import './env'
-import { Hono } from 'hono'
-import { serve } from '@hono/node-server'
-import { cors } from 'hono/cors'
-import db from './db'
+const app = new Hono();
 
-const app = new Hono()
+// Middleware
+app.use('*', logger()); // Adds request logging
+app.use('*', cors());
 
-app.use('*', cors())
+// Health Check
+app.get('/', (c) => c.json({ message: 'Property Parcels API', status: 'ok' }));
 
-app.get('/', (c) => c.json({ message: 'Property Parcels API' }))
+// Mount Routes
+app.route('/v1/api/parcels', parcelRoutes);
 
-
-app.get('/v1/api/parcels', async (c) => {
-  try {
-    const result = await db.query(`
-      SELECT
-        sl_uuid,
-        address,
-        county,
-        sqft,
-        total_value,
-        CAST(public.ST_AsGeoJSON(geom) AS jsonb) AS geometry
-      FROM takehome.dallas_parcels
-      LIMIT 100
-    `)
-    return c.json(result.rows)
-  } catch (error) {
-    console.error(error)
-    return c.json({ error: 'Database error' }, 500)
-  }
-})
-
-
-
+// Server Start
 const port = Number(process.env.PORT) || 3000;
+
+console.log(`Starting server on port ${port}...`);
+
 serve({
   fetch: app.fetch,
   port,
-}, () => {
-  console.log(`Server is running on port ${port}`);
 });
 
-export default app
+export default app;

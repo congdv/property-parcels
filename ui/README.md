@@ -12,11 +12,13 @@ This template provides a minimal setup to get React working in Vite with HMR, Ty
 ### Installation
 
 1. Install dependencies:
+
    ```bash
    npm install
    ```
 
 2. Start the development server:
+
    ```bash
    npm run dev
    ```
@@ -53,4 +55,7 @@ npm run preview
 ## MUI Setup
 
 The project is configured with MUI's ThemeProvider and CssBaseline for consistent styling. You can customize the theme in `src/main.tsx`.
+
+```
+
 ```
