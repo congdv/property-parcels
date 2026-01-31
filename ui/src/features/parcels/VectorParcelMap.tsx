@@ -1,10 +1,19 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Map, { Source, Layer} from 'react-map-gl/mapbox';
 import { API_BASE_URL } from '../../env';
 
-const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload: { feature: any; lngLat?: any; point?: any; client?: { x: number; y: number } }) => void }> = ({ accessToken, onParcelClick }) => {
+const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload: { feature: any; lngLat?: any; point?: any; client?: { x: number; y: number } }) => void; authToken?: string }> = ({ accessToken, onParcelClick, authToken }) => {
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
+
+  const transformRequest = useCallback((url: string) => {
+    const headers: Record<string, string> = {};
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
+    }
+    console.log("headers", headers, authToken)
+    return { url, headers };
+  }, [authToken]);
 
   const handleMapClick = (e: any) => {
     const features = e?.features ?? [];
@@ -125,6 +134,7 @@ const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload:
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{ width: '100%', height: '100%' }}
+        transformRequest={transformRequest}
       >
       <Source
         id="parcel-tiles"

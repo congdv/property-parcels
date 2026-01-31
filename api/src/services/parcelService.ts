@@ -6,12 +6,13 @@ export const getParcelsList = async () => {
   return result.rows;
 };
 
-export const getParcelTile = async (z: number, x: number, y: number) => {
+export const getParcelTile = async (z: number, x: number, y: number, filter?: { county?: string }) => {
   // Logic switch: Use clustering for zoom <= 13, raw parcels for > 13
   const isClustering = z <= 13;
   const sql = isClustering ? CLUSTER_TILE_SQL : PARCEL_TILE_SQL;
   
-  const result = await db.query(sql, [z, x, y]);
+  const county = filter?.county || null;
+  const result = await db.query(sql, [z, x, y, county]);
   
   const mvt = result.rows[0]?.mvt;
   const mvtSize = mvt ? (mvt.length ?? Buffer.byteLength(mvt)) : 0;

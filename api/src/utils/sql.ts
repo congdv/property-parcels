@@ -11,7 +11,7 @@ export const CLUSTER_TILE_SQL = `
     WHERE ST_Intersects(
       ST_Transform(t.geom, 3857), 
       ST_Expand(b.geom, (ST_XMax(b.geom) - ST_XMin(b.geom)) * 0.1)
-    )
+    ) AND ($4::text IS NULL OR t.county = $4::text)
   ),
   clustered_points AS (
     SELECT 
@@ -55,7 +55,7 @@ export const PARCEL_TILE_SQL = `
         bounds.geom
       ) AS geom
     FROM takehome.dallas_parcels p, bounds
-    WHERE public.ST_Intersects(public.ST_Transform(p.geom, 3857), bounds.geom)
+    WHERE public.ST_Intersects(public.ST_Transform(p.geom, 3857), bounds.geom) AND ($4::text IS NULL OR p.county = $4::text)
   )
   SELECT public.ST_AsMVT(mvt_geom.*, 'parcel-layer') AS mvt FROM mvt_geom;
 `;
