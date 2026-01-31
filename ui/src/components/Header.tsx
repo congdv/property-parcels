@@ -8,8 +8,6 @@ import { useAuth } from 'react-oidc-context';
 const Header: React.FC = () => {
   const auth = useAuth();
 
-  console.log(auth)
-
   const handleLogin = () => {
     auth.signinRedirect();
   };
