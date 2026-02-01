@@ -207,13 +207,9 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Confirm Export</DialogTitle>
         <DialogContent>
-          <Typography>Export CSV with the following filters:</Typography>
-          <Box sx={{ mt: 1 }}>
-            <Typography>- Min price: {pendingFilters?.minPrice ?? 'Any'}</Typography>
-            <Typography>- Max price: {pendingFilters?.maxPrice ?? 'Any'}</Typography>
-            <Typography>- Min size: {pendingFilters?.minSize ?? 'Any'}</Typography>
-            <Typography>- Max size: {pendingFilters?.maxSize ?? 'Any'}</Typography>
-          </Box>
+          <Typography>
+            We'll open a new tab to export and download the CSV file. Continue?
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
