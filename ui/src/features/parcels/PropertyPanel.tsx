@@ -10,7 +10,7 @@ import type { Filters } from '../../types/filters';
 
 const PropertyPanel: React.FC<{ filters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({
   filters,
-  onFiltersChange,
+  // ...existing code...
 }) => {
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
   const { popup, showPopup, hidePopup } = usePopup();

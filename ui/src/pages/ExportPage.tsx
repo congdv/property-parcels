@@ -23,7 +23,7 @@ function getFiltersFromLocalStorage(): Filters {
 
 const ExportPage: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
-  const [error, setError] = useState<string | null>(null);
+  // ...existing code...
 
   const [filters, setFilters] = useState<Filters>({});
 
@@ -41,7 +41,7 @@ const ExportPage: React.FC = () => {
         await exportParcelsCSV(stored, token);
         setStatus('done');
       } catch (e: any) {
-        setError(e?.message || String(e));
+        // ...existing code...
         setStatus('error');
       }
     };
