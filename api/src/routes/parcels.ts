@@ -133,6 +133,7 @@ app.get(
       };
 
       const filter: any = isGuest ? { county: "dallas" } : {};
+      console.log("-----filter ", filter, isGuest)
       // Allow overriding county via query param if present
       if (qp.county) filter.county = String(qp.county);
       const minPrice = parseNum(qp.minPrice as string | undefined);

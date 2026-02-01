@@ -1,4 +1,5 @@
 import db from "../db";
+import { cacheGet, cacheSet } from "../cache";
 import {
   CLUSTER_TILE_SQL,
   PARCEL_TILE_SQL,
@@ -6,8 +7,22 @@ import {
 } from "../utils/sql";
 
 export const getParcelsList = async () => {
+  const cacheKey = "parcels:list";
+
+  // Try to get from cache first
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  // Query database if not in cache
   const result = await db.query(LIST_PARCELS_SQL);
-  return result.rows;
+  const rows = result.rows;
+
+  // Store in cache with 1 month TTL
+  await cacheSet(cacheKey, rows);
+
+  return rows;
 };
 
 export const getParcelsForExport = async (filter?: {
@@ -45,6 +60,19 @@ export const getParcelTile = async (
     searchQuery?: string;
   },
 ) => {
+  // Create cache key from tile coordinates and filters
+  const cacheKey = `parcels:tile:${z}:${x}:${y}:${JSON.stringify(filter || {})}`;
+
+  // Try to get from cache first
+  const cached = await cacheGet(cacheKey);
+  if (cached) {
+    // Convert mvt back to Buffer if it was serialized
+    if (cached.mvt && cached.mvt.type === 'Buffer' && cached.mvt.data) {
+      cached.mvt = Buffer.from(cached.mvt.data);
+    }
+    return cached;
+  }
+
   // Logic switch: Use clustering for zoom <= 13, raw parcels for > 13
   const isClustering = z <= 13;
   const sql = isClustering ? CLUSTER_TILE_SQL : PARCEL_TILE_SQL;
@@ -70,5 +98,10 @@ export const getParcelTile = async (
   const mvt = result.rows[0]?.mvt;
   const mvtSize = mvt ? (mvt.length ?? Buffer.byteLength(mvt)) : 0;
 
-  return { mvt, mvtSize };
+  const response = { mvt, mvtSize };
+
+  // Store in cache with 1 month TTL
+  await cacheSet(cacheKey, response);
+
+  return response;
 };
