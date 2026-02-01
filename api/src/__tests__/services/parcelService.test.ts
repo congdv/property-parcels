@@ -80,6 +80,7 @@ describe('Parcel Service', () => {
         null,
         null,
         null,
+        null,
       ]);
     });
 
@@ -107,6 +108,7 @@ describe('Parcel Service', () => {
         null,
         null,
         null,
+        null,
       ]);
     });
 
@@ -124,6 +126,7 @@ describe('Parcel Service', () => {
         null,
         250000,
         750000,
+        null,
         null,
         null,
       ]);
@@ -145,6 +148,7 @@ describe('Parcel Service', () => {
         null,
         2000,
         8000,
+        null,
       ]);
     });
 
@@ -167,6 +171,47 @@ describe('Parcel Service', () => {
         800000,
         1500,
         7500,
+        null,
+      ]);
+    });
+
+    it('should apply search query filter', async () => {
+      const mockRows: any[] = [];
+
+      (db.query as jest.Mock).mockResolvedValue({ rows: mockRows });
+
+      await parcelService.getParcelsForExport({
+        searchQuery: 'main street',
+      });
+
+      expect(db.query).toHaveBeenCalledWith(expect.any(String), [
+        null,
+        null,
+        null,
+        null,
+        null,
+        'main street',
+      ]);
+    });
+
+    it('should apply search query with other filters', async () => {
+      const mockRows: any[] = [];
+
+      (db.query as jest.Mock).mockResolvedValue({ rows: mockRows });
+
+      await parcelService.getParcelsForExport({
+        county: 'dallas',
+        minPrice: 250000,
+        searchQuery: 'oak avenue',
+      });
+
+      expect(db.query).toHaveBeenCalledWith(expect.any(String), [
+        'dallas',
+        250000,
+        null,
+        null,
+        null,
+        'oak avenue',
       ]);
     });
   });
@@ -190,6 +235,7 @@ describe('Parcel Service', () => {
         null,
         null,
         null,
+        null,
       ]);
     });
 
@@ -203,7 +249,7 @@ describe('Parcel Service', () => {
       expect(result.mvt).toBeDefined();
       expect(db.query).toHaveBeenCalledWith(
         expect.not.stringContaining('CLUSTER'),
-        [14, 1000, 2000, null, null, null, null, null]
+        [14, 1000, 2000, null, null, null, null, null, null]
       );
     });
 
@@ -276,6 +322,42 @@ describe('Parcel Service', () => {
         900000,
         3000,
         8000,
+        null,
+      ]);
+    });
+
+    it('should apply search query filter for tiles', async () => {
+      (db.query as jest.Mock).mockResolvedValue({ rows: [{ mvt: null }] });
+
+      await parcelService.getParcelTile(13, 1000, 2000, { searchQuery: 'main' });
+
+      const callArgs = (db.query as jest.Mock).mock.calls[0][1];
+      expect(callArgs[8]).toBe('main');
+    });
+
+    it('should apply search query with all filters for tiles', async () => {
+      (db.query as jest.Mock).mockResolvedValue({ rows: [{ mvt: null }] });
+
+      await parcelService.getParcelTile(12, 500, 1500, {
+        county: 'travis',
+        minPrice: 150000,
+        maxPrice: 750000,
+        minSize: 2500,
+        maxSize: 9000,
+        searchQuery: 'oak',
+      });
+
+      const callArgs = (db.query as jest.Mock).mock.calls[0][1];
+      expect(callArgs).toEqual([
+        12,
+        500,
+        1500,
+        'travis',
+        150000,
+        750000,
+        2500,
+        9000,
+        'oak',
       ]);
     });
   });
