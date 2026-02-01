@@ -11,7 +11,6 @@ import Typography from '@mui/material/Typography';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import type { Filters } from '../../types/filters';
-import { exportParcelsCSV } from '../../services/exportService';
 
 const FILTERS_KEY = 'parcelFilters';
 
@@ -34,7 +33,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
     try {
       const raw = localStorage.getItem(FILTERS_KEY);
       const parsed: Filters | null = raw ? JSON.parse(raw) : null;
-      const start = initialFilters ?? parsed ?? {};
+      const start = parsed ?? initialFilters ?? {};
       if (start.minPrice != null) setMinPrice(start.minPrice);
       if (start.maxPrice != null) setMaxPrice(start.maxPrice);
       if (start.minSize != null) setMinSize(start.minSize);
