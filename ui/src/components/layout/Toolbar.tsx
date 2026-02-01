@@ -14,6 +14,24 @@ import type { Filters } from '../../types/filters';
 
 const FILTERS_KEY = 'parcelFilters';
 
+function formatLabel(min: number | null | undefined, max: number | null | undefined, type: string) {
+  if (type === 'price') {
+    if ((max != null && max !== 10000000 )|| (min != null && min !== 0)) {
+      min = min ?? 0;
+      max = max ?? 10000000;
+      return `\$${min.toLocaleString()} - \$${max.toLocaleString()}`
+    }
+    return 'Price'
+  } else {
+    if ((max != null && max !== 10000 ) || (min != null && min !== 0)) {
+      min = min ?? 0;
+      max = max ?? 10000;
+      return `\$${min.toLocaleString()} - \$${max.toLocaleString()}`
+    }
+    return 'Size'
+  }
+}
+
 const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({
   initialFilters,
   onFiltersChange,
@@ -91,12 +109,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
     const [min, max] = priceSliderValue;
     setMinPrice(min);
     setMaxPrice(max);
-    let current: Filters = {};
-    try {
-      const raw = localStorage.getItem(FILTERS_KEY);
-      if (raw) current = JSON.parse(raw);
-    } catch (e) {}
-    const updated = { ...current, minPrice: min, maxPrice: max };
+    const updated = { ...initialFilters, minPrice: min, maxPrice: max };
     if (onFiltersChange) onFiltersChange(updated);
     handlePriceClose();
   };
@@ -114,12 +127,8 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
     const [min, max] = sizeSliderValue;
     setMinSize(min);
     setMaxSize(max);
-    let current: Filters = {};
-    try {
-      const raw = localStorage.getItem(FILTERS_KEY);
-      if (raw) current = JSON.parse(raw);
-    } catch (e) {}
-    const updated = { ...current, minSize: min, maxSize: max };
+   
+    const updated = { ...initialFilters, minSize: min, maxSize: max };
     if (onFiltersChange) onFiltersChange(updated);
     handleSizeClose();
   };
@@ -138,11 +147,11 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   const confirmExport = () => {
     if (!pendingFilters) return;
     try {
-      try {
-        localStorage.setItem(FILTERS_KEY, JSON.stringify(pendingFilters));
-      } catch (e) {
-        // ignore storage errors
-      }
+      // try {
+      //   localStorage.setItem(FILTERS_KEY, JSON.stringify(pendingFilters));
+      // } catch (e) {
+      //   // ignore storage errors
+      // }
       window.open('/export', '_blank');
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -180,7 +189,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
             endIcon={<KeyboardArrowDownIcon />}
             sx={{ borderRadius: '999px', textTransform: 'none', backgroundColor: '#f0f4f4' }}
           >
-            Price
+            {formatLabel(initialFilters?.minPrice, initialFilters?.maxPrice, 'price')}
           </Button>
           <Button
             variant="outlined"
@@ -188,7 +197,8 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
             endIcon={<KeyboardArrowDownIcon />}
             sx={{ borderRadius: '999px', textTransform: 'none', backgroundColor: '#f0f4f4' }}
           >
-            Size
+            {formatLabel(initialFilters?.minSize, initialFilters?.maxSize, 'size')}
+
           </Button>
         </Box>
 
