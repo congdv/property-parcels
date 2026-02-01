@@ -18,9 +18,7 @@ const cognitoAuthConfig = {
 export function AppProviders({ children }: PropsWithChildren) {
   return (
     <AuthProvider {...cognitoAuthConfig}>
-      <ThemeProvider theme={theme}>
-        {children}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
     </AuthProvider>
   );
 }

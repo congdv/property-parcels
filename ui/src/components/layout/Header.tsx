@@ -7,7 +7,11 @@ import { useAuth } from 'react-oidc-context';
 import CustomToolbar from './Toolbar';
 import type { Filters } from '../../types/filters';
 
-const Header: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({ initialFilters, onFiltersChange }) => {
+const Header: React.FC<{
+  initialFilters?: Filters;
+  onFiltersChange?: (f: Filters) => void;
+  hideToolbar?: boolean;
+}> = ({ initialFilters, onFiltersChange, hideToolbar }) => {
   const auth = useAuth();
 
   const handleLogin = () => {
@@ -76,7 +80,9 @@ const Header: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters
           )}
         </Toolbar>
       </AppBar>
-      <CustomToolbar initialFilters={initialFilters} onFiltersChange={onFiltersChange} />
+      {!hideToolbar && (
+        <CustomToolbar initialFilters={initialFilters} onFiltersChange={onFiltersChange} />
+      )}
     </>
   );
 };

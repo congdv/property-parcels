@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import Popover from '@mui/material/Popover';
 import Slider from '@mui/material/Slider';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 import type { Filters } from '../../types/filters';
+import { exportParcelsCSV } from '../../services/exportService';
 
 const FILTERS_KEY = 'parcelFilters';
 
-const parseNumber = (v: string) => {
-  const n = Number(v);
-  return Number.isNaN(n) ? null : n;
-};
-
-const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({ initialFilters, onFiltersChange }) => {
-  const [open, setOpen] = useState(false);
+const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({
+  initialFilters,
+  onFiltersChange,
+}) => {
   const [minPrice, setMinPrice] = useState<number | ''>('');
   const [maxPrice, setMaxPrice] = useState<number | ''>('');
   const [minSize, setMinSize] = useState<number | ''>('');
@@ -26,6 +27,8 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   const [priceSliderValue, setPriceSliderValue] = useState<number[]>([0, 10000000]);
   const [sizeAnchor, setSizeAnchor] = useState<HTMLButtonElement | null>(null);
   const [sizeSliderValue, setSizeSliderValue] = useState<number[]>([0, 10000]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingFilters, setPendingFilters] = useState<Filters | null>(null);
 
   useEffect(() => {
     try {
@@ -56,7 +59,6 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
       // ignore
     }
     if (onFiltersChange) onFiltersChange(filters);
-    setOpen(false);
   };
 
   const handleReset = () => {
@@ -78,7 +80,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   };
 
   const formatPriceValue = (v: number) => {
-    if(v >= 10000000) {
+    if (v >= 10000000) {
       return `$${v.toLocaleString()}+`;
     }
     return `$${v.toLocaleString()}`;
@@ -123,9 +125,55 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
     handleSizeClose();
   };
 
+  const handleExport = () => {
+    const filters: Filters = {
+      minPrice: typeof minPrice === 'number' ? minPrice : null,
+      maxPrice: typeof maxPrice === 'number' ? maxPrice : null,
+      minSize: typeof minSize === 'number' ? minSize : null,
+      maxSize: typeof maxSize === 'number' ? maxSize : null,
+    };
+    setPendingFilters(filters);
+    setConfirmOpen(true);
+  };
+
+  const confirmExport = () => {
+    if (!pendingFilters) return;
+    try {
+      try {
+        localStorage.setItem(FILTERS_KEY, JSON.stringify(pendingFilters));
+      } catch (e) {
+        // ignore storage errors
+      }
+      window.open('/export', '_blank');
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open export tab', e);
+      // eslint-disable-next-line no-alert
+      alert('Could not open export tab. See console for details.');
+    } finally {
+      setConfirmOpen(false);
+      setPendingFilters(null);
+    }
+  };
+
   return (
-    <Box sx={{ backgroundColor: '#f5fbfd', padding: '0.5rem 1rem', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+    <Box
+      sx={{
+        backgroundColor: '#f5fbfd',
+        padding: '0.5rem 1rem',
+        borderBottom: '1px solid rgba(0,0,0,0.06)',
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 1,
+          alignItems: 'center',
+          maxWidth: 1200,
+          margin: '0 auto',
+          width: '100%',
+        }}
+      >
         <Box sx={{ flex: 1, display: 'flex', gap: 1, justifyContent: 'flex-start' }}>
           <Button
             variant="outlined"
@@ -145,15 +193,36 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
           </Button>
         </Box>
 
-         <Button variant="contained" onClick={handleSave} sx={{ textTransform: 'none' }}>
-            Save
-          </Button>
-          <Button variant="outlined" onClick={handleReset} sx={{ textTransform: 'none' }}>
-            Reset
-          </Button>
+        <Button variant="contained" onClick={handleSave} sx={{ textTransform: 'none' }}>
+          Save
+        </Button>
+        <Button variant="outlined" onClick={handleExport} sx={{ textTransform: 'none' }}>
+          Export CSV
+        </Button>
+        <Button variant="outlined" onClick={handleReset} sx={{ textTransform: 'none' }}>
+          Reset
+        </Button>
       </Box>
 
-   
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Confirm Export</DialogTitle>
+        <DialogContent>
+          <Typography>Export CSV with the following filters:</Typography>
+          <Box sx={{ mt: 1 }}>
+            <Typography>- Min price: {pendingFilters?.minPrice ?? 'Any'}</Typography>
+            <Typography>- Max price: {pendingFilters?.maxPrice ?? 'Any'}</Typography>
+            <Typography>- Min size: {pendingFilters?.minSize ?? 'Any'}</Typography>
+            <Typography>- Max size: {pendingFilters?.maxSize ?? 'Any'}</Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={confirmExport}>
+            Export
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Popover
         open={Boolean(priceAnchor)}
         anchorEl={priceAnchor}
@@ -161,10 +230,22 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ padding: 2, width: 500, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Price</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Price
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width:'100px', background: '#fff', padding: '0.6rem 1rem', borderRadius: 1, boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset' }}>
-              <Typography sx={{ fontWeight: 600 }}>{formatPriceValue(priceSliderValue[0])}</Typography>
+            <Box
+              sx={{
+                width: '100px',
+                background: '#fff',
+                padding: '0.6rem 1rem',
+                borderRadius: 1,
+                boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset',
+              }}
+            >
+              <Typography sx={{ fontWeight: 600 }}>
+                {formatPriceValue(priceSliderValue[0])}
+              </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
               <Slider
@@ -176,13 +257,27 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
                 step={50000}
               />
             </Box>
-            <Box sx={{ width: '150px', background: '#fff', padding: '0.6rem 1rem', borderRadius: 1, boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset' }}>
-              <Typography sx={{ fontWeight: 600 }}>{formatPriceValue(priceSliderValue[1])}</Typography>
+            <Box
+              sx={{
+                width: '150px',
+                background: '#fff',
+                padding: '0.6rem 1rem',
+                borderRadius: 1,
+                boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset',
+              }}
+            >
+              <Typography sx={{ fontWeight: 600 }}>
+                {formatPriceValue(priceSliderValue[1])}
+              </Typography>
             </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-            <Button onClick={handlePriceClose} sx={{ textTransform: 'none' }}>Cancel</Button>
-            <Button variant="contained" onClick={applyPrice} sx={{ textTransform: 'none' }}>Apply</Button>
+            <Button onClick={handlePriceClose} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={applyPrice} sx={{ textTransform: 'none' }}>
+              Apply
+            </Button>
           </Box>
         </Box>
       </Popover>
@@ -193,10 +288,22 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ padding: 2, width: 420, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Size</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+            Size
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ width:'100px', background: '#fff', padding: '0.6rem 1rem', borderRadius: 1, boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset' }}>
-              <Typography sx={{ fontWeight: 600 }}>{sizeSliderValue[0].toLocaleString()}</Typography>
+            <Box
+              sx={{
+                width: '100px',
+                background: '#fff',
+                padding: '0.6rem 1rem',
+                borderRadius: 1,
+                boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset',
+              }}
+            >
+              <Typography sx={{ fontWeight: 600 }}>
+                {sizeSliderValue[0].toLocaleString()}
+              </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
               <Slider
@@ -208,13 +315,27 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
                 step={10}
               />
             </Box>
-            <Box sx={{ width: '100px', background: '#fff', padding: '0.6rem 1rem', borderRadius: 1, boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset' }}>
-              <Typography sx={{ fontWeight: 600 }}>{sizeSliderValue[1] >= 10000 ? '10,000+' : `${sizeSliderValue[1].toLocaleString()}`}</Typography>
+            <Box
+              sx={{
+                width: '100px',
+                background: '#fff',
+                padding: '0.6rem 1rem',
+                borderRadius: 1,
+                boxShadow: '0 0 0 1px rgba(0,0,0,0.04) inset',
+              }}
+            >
+              <Typography sx={{ fontWeight: 600 }}>
+                {sizeSliderValue[1] >= 10000 ? '10,000+' : `${sizeSliderValue[1].toLocaleString()}`}
+              </Typography>
             </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-            <Button onClick={handleSizeClose} sx={{ textTransform: 'none' }}>Cancel</Button>
-            <Button variant="contained" onClick={applySize} sx={{ textTransform: 'none' }}>Apply</Button>
+            <Button onClick={handleSizeClose} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={applySize} sx={{ textTransform: 'none' }}>
+              Apply
+            </Button>
           </Box>
         </Box>
       </Popover>

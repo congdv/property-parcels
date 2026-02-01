@@ -6,7 +6,6 @@ import { useAuth } from 'react-oidc-context';
 import PropertyPanel from '../features/parcels/PropertyPanel';
 import type { Filters } from '../types/filters';
 
-
 function HomePage() {
   const auth = useAuth();
   const [filters, setFilters] = useState<Filters>({});

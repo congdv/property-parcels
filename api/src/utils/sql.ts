@@ -80,3 +80,19 @@ export const LIST_PARCELS_SQL = `
   FROM takehome.dallas_parcels
   LIMIT 100
 `;
+
+export const LIST_PARCELS_FILTER_SQL = `
+  SELECT
+    sl_uuid,
+    address,
+    county,
+    sqft,
+    total_value,
+    to_char(total_value, 'FM999,999,999,999') AS formatted_value
+  FROM takehome.dallas_parcels p
+  WHERE ($1::text IS NULL OR p.county = $1::text)
+    AND ($2::numeric IS NULL OR p.total_value >= $2::numeric)
+    AND ($3::numeric IS NULL OR p.total_value <= $3::numeric)
+    AND ($4::numeric IS NULL OR p.sqft >= $4::numeric)
+    AND ($5::numeric IS NULL OR p.sqft <= $5::numeric)
+`;
