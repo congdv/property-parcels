@@ -189,7 +189,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
             endIcon={<KeyboardArrowDownIcon />}
             sx={{ borderRadius: '999px', textTransform: 'none', backgroundColor: '#f0f4f4' }}
           >
-            {formatLabel(initialFilters?.minPrice, initialFilters?.maxPrice, 'price')}
+            {formatLabel(typeof minPrice === 'number' ? minPrice : null, typeof maxPrice === 'number' ? maxPrice : null, 'price')}
           </Button>
           <Button
             variant="outlined"
@@ -197,7 +197,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
             endIcon={<KeyboardArrowDownIcon />}
             sx={{ borderRadius: '999px', textTransform: 'none', backgroundColor: '#f0f4f4' }}
           >
-            {formatLabel(initialFilters?.minSize, initialFilters?.maxSize, 'size')}
+            {formatLabel(typeof minSize === 'number' ? minSize : null, typeof maxSize === 'number' ? maxSize : null, 'size')}
 
           </Button>
         </Box>
