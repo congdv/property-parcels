@@ -9,8 +9,10 @@ import Popover from '@mui/material/Popover';
 import Slider from '@mui/material/Slider';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Alert from '@mui/material/Alert';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SearchIcon from '@mui/icons-material/Search';
+import { useAuth } from 'react-oidc-context';
 
 import type { Filters } from '../../types/filters';
 
@@ -38,6 +40,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   initialFilters,
   onFiltersChange,
 }) => {
+  const { isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [minPrice, setMinPrice] = useState<number | ''>('');
   const [maxPrice, setMaxPrice] = useState<number | ''>('');
@@ -49,6 +52,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   const [sizeSliderValue, setSizeSliderValue] = useState<number[]>([0, 10000]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingFilters, setPendingFilters] = useState<Filters | null>(null);
+  const [showAuthAlert, setShowAuthAlert] = useState(false);
 
   useEffect(() => {
     try {
@@ -155,6 +159,11 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   };
 
   const handleExport = () => {
+    if (!isAuthenticated) {
+      setShowAuthAlert(true);
+      return;
+    }
+
     const filters: Filters = {
       minPrice: typeof minPrice === 'number' ? minPrice : null,
       maxPrice: typeof maxPrice === 'number' ? maxPrice : null,
@@ -186,13 +195,19 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: '#f5fbfd',
-        padding: '0.5rem 1rem',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-      }}
-    >
+    <>
+      {showAuthAlert && (
+        <Alert severity="warning" onClose={() => setShowAuthAlert(false)} sx={{ m: 1 }}>
+          Please log in to export data
+        </Alert>
+      )}
+      <Box
+        sx={{
+          backgroundColor: '#f5fbfd',
+          padding: '0.5rem 1rem',
+          borderBottom: '1px solid rgba(0,0,0,0.06)',
+        }}
+      >
       <Box
         sx={{
           display: 'flex',
@@ -414,7 +429,8 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
           </Box>
         </Box>
       </Popover>
-    </Box>
+      </Box>
+    </>
   );
 };
 
