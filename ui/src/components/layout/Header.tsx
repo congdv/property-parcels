@@ -4,8 +4,10 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useAuth } from 'react-oidc-context';
+import CustomToolbar from './Toolbar';
+import type { Filters } from '../../types/filters';
 
-const Header: React.FC = () => {
+const Header: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({ initialFilters, onFiltersChange }) => {
   const auth = useAuth();
 
   const handleLogin = () => {
@@ -17,25 +19,49 @@ const Header: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#6EC1E4', boxShadow: 'none' }}>
-      <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: '#255963' }}>
-          Property Parcels
-        </Typography>
-        {auth.isLoading ? null : auth.isAuthenticated ? (
-          <>
-            <Typography sx={{ color: '#255963', marginRight: 2, fontWeight: 500 }}>
-              {auth.user?.profile.name}
-            </Typography>
+    <>
+      <AppBar position="static" sx={{ backgroundColor: '#6EC1E4', boxShadow: 'none' }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, color: '#255963' }}>
+            Property Parcels
+          </Typography>
+          {auth.isLoading ? null : auth.isAuthenticated ? (
+            <>
+              <Typography sx={{ color: '#255963', marginRight: 2, fontWeight: 500 }}>
+                {auth.user?.profile.name}
+              </Typography>
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: '#fff',
+                  color: '#255963',
+                  borderRadius: '2em',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  boxShadow: 'none',
+                  padding: '0.3em 1.5em',
+                  '&:hover': {
+                    backgroundColor: '#e6f2f8',
+                    boxShadow: 'none',
+                  },
+                }}
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
             <Button
               variant="contained"
+              startIcon={<ArrowForwardIcon />}
               sx={{
                 backgroundColor: '#fff',
                 color: '#255963',
                 borderRadius: '2em',
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '1.1rem',
+                fontSize: '1.3rem',
                 boxShadow: 'none',
                 padding: '0.3em 1.5em',
                 '&:hover': {
@@ -43,36 +69,15 @@ const Header: React.FC = () => {
                   boxShadow: 'none',
                 },
               }}
-              onClick={handleLogout}
+              onClick={handleLogin}
             >
-              Logout
+              Login
             </Button>
-          </>
-        ) : (
-          <Button
-            variant="contained"
-            startIcon={<ArrowForwardIcon />}
-            sx={{
-              backgroundColor: '#fff',
-              color: '#255963',
-              borderRadius: '2em',
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '1.3rem',
-              boxShadow: 'none',
-              padding: '0.3em 1.5em',
-              '&:hover': {
-                backgroundColor: '#e6f2f8',
-                boxShadow: 'none',
-              },
-            }}
-            onClick={handleLogin}
-          >
-            Login
-          </Button>
-        )}
-      </Toolbar>
-    </AppBar>
+          )}
+        </Toolbar>
+      </AppBar>
+      <CustomToolbar initialFilters={initialFilters} onFiltersChange={onFiltersChange} />
+    </>
   );
 };
 

@@ -46,8 +46,27 @@ app.get(
     const isGuest = c.get('isGuest') as boolean;
 
     try {
-      // If guest, filter by county 'dallas'
-      const filter = isGuest ? { county: 'dallas' } : {};
+      // Parse optional filter query params
+      const qp = c.req.query();
+      const parseNum = (v: string | undefined) => {
+        if (!v) return null;
+        const n = Number(v);
+        return Number.isNaN(n) ? null : n;
+      };
+
+      const filter: any = isGuest ? { county: 'dallas' } : {};
+      // Allow overriding county via query param if present
+      if (qp.county) filter.county = String(qp.county);
+      const minPrice = parseNum(qp.minPrice as string | undefined);
+      const maxPrice = parseNum(qp.maxPrice as string | undefined);
+      const minSize = parseNum(qp.minSize as string | undefined);
+      const maxSize = parseNum(qp.maxSize as string | undefined);
+
+      if (minPrice != null) filter.minPrice = minPrice;
+      if (maxPrice != null) filter.maxPrice = maxPrice;
+      if (minSize != null) filter.minSize = minSize;
+      if (maxSize != null) filter.maxSize = maxSize;
+
       const { mvt, mvtSize } = await parcelService.getParcelTile(z, x, y, filter);
 
       console.log(`Tile Request: ${z}/${x}/${y} | Size: ${mvtSize} | Guest: ${isGuest}`);

@@ -1,13 +1,15 @@
 import { CssBaseline } from '@mui/material';
 import Header from '../components/layout/Header';
 import '../styles/App.css';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import PropertyPanel from '../features/parcels/PropertyPanel';
+import type { Filters } from '../types/filters';
 
 
 function HomePage() {
   const auth = useAuth();
+  const [filters, setFilters] = useState<Filters>({});
 
   useEffect(() => {
     if (auth.isAuthenticated && window.location.search.includes('code=')) {
@@ -21,9 +23,9 @@ function HomePage() {
   return (
     <div className="app-root">
       <CssBaseline />
-      <Header />
+      <Header initialFilters={filters} onFiltersChange={setFilters} />
       <div className="map-container">
-        <PropertyPanel />
+        <PropertyPanel filters={filters} onFiltersChange={setFilters} />
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Map, { Source, Layer} from 'react-map-gl/mapbox';
 import { API_BASE_URL } from '../../env';
+import type { Filters } from '../../types/filters';
 
-const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload: { feature: any; lngLat?: any; point?: any; client?: { x: number; y: number } }) => void; authToken?: string }> = ({ accessToken, onParcelClick, authToken }) => {
+const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload: { feature: any; lngLat?: any; point?: any; client?: { x: number; y: number } }) => void; authToken?: string; filters?: Filters }> = ({ accessToken, onParcelClick, authToken, filters }) => {
   const mapRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,7 +12,6 @@ const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload:
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
     }
-    console.log("headers", headers, authToken)
     return { url, headers };
   }, [authToken]);
 
@@ -106,6 +106,16 @@ const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload:
     };
   }, []);
 
+  const buildTileUrl = (f?: Filters) => {
+    const params = new URLSearchParams();
+    if (f?.minPrice != null) params.set('minPrice', String(f.minPrice));
+    if (f?.maxPrice != null) params.set('maxPrice', String(f.maxPrice));
+    if (f?.minSize != null) params.set('minSize', String(f.minSize));
+    if (f?.maxSize != null) params.set('maxSize', String(f.maxSize));
+    const qs = params.toString();
+    return `${API_BASE_URL}/parcels/{z}/{x}/{y}${qs ? `?${qs}` : ''}`;
+  };
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       {loading && (
@@ -139,7 +149,7 @@ const VectorParcelMap: React.FC<{ accessToken: string; onParcelClick?: (payload:
       <Source
         id="parcel-tiles"
         type="vector"
-        tiles={[`${API_BASE_URL}/parcels/{z}/{x}/{y}`]}
+        tiles={[buildTileUrl(filters)]}
         minzoom={6}
         maxzoom={14}
       >

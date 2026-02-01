@@ -6,8 +6,9 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
+import type { Filters } from '../../types/filters';
 
-const PropertyPanel = () => {
+const PropertyPanel: React.FC<{ filters?: Filters; onFiltersChange?: (f: Filters) => void }> = ({ filters, onFiltersChange }) => {
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
   const { popup, showPopup, hidePopup } = usePopup();
   const auth = useAuth();
@@ -31,7 +32,7 @@ const PropertyPanel = () => {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <VectorParcelMap accessToken={mapboxAccessToken} onParcelClick={showPopup} authToken={token} />
+      <VectorParcelMap accessToken={mapboxAccessToken} onParcelClick={showPopup} authToken={token} filters={filters} />
       <ParcelPopup popup={popup} onClose={hidePopup} />
     </div>
   );
