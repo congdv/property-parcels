@@ -3,4 +3,5 @@ export type Filters = {
   maxPrice?: number | null;
   minSize?: number | null;
   maxSize?: number | null;
+  searchQuery?: string | null;
 };

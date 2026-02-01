@@ -16,16 +16,18 @@ export const getParcelsForExport = async (filter?: {
   maxPrice?: number | null;
   minSize?: number | null;
   maxSize?: number | null;
+  searchQuery?: string | null;
 }) => {
   const county = filter?.county || null;
   const minPrice = filter?.minPrice ?? null;
   const maxPrice = filter?.maxPrice ?? null;
   const minSize = filter?.minSize ?? null;
   const maxSize = filter?.maxSize ?? null;
+  const searchQuery = filter?.searchQuery || null;
 
   // Import the filtered SQL lazily to avoid circular ordering in file
   const { LIST_PARCELS_FILTER_SQL } = await import("../utils/sql");
-  const params = [county, minPrice, maxPrice, minSize, maxSize];
+  const params = [county, minPrice, maxPrice, minSize, maxSize, searchQuery];
   const result = await db.query(LIST_PARCELS_FILTER_SQL, params);
   return result.rows;
 };
@@ -40,6 +42,7 @@ export const getParcelTile = async (
     maxPrice?: number;
     minSize?: number;
     maxSize?: number;
+    searchQuery?: string;
   },
 ) => {
   // Logic switch: Use clustering for zoom <= 13, raw parcels for > 13
@@ -51,6 +54,7 @@ export const getParcelTile = async (
   let maxPrice = filter?.maxPrice ?? null;
   const minSize = filter?.minSize ?? null;
   let maxSize = filter?.maxSize ?? null;
+  const searchQuery = filter?.searchQuery || null;
 
   if (maxPrice === 10000000) {
     maxPrice = null;
@@ -60,7 +64,7 @@ export const getParcelTile = async (
     maxSize = null;
   }
 
-  const params = [z, x, y, county, minPrice, maxPrice, minSize, maxSize];
+  const params = [z, x, y, county, minPrice, maxPrice, minSize, maxSize, searchQuery];
   const result = await db.query(sql, params);
 
   const mvt = result.rows[0]?.mvt;

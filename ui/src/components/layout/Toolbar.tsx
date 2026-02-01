@@ -7,8 +7,10 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Popover from '@mui/material/Popover';
 import Slider from '@mui/material/Slider';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import SearchIcon from '@mui/icons-material/Search';
 
 import type { Filters } from '../../types/filters';
 
@@ -36,6 +38,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
   initialFilters,
   onFiltersChange,
 }) => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [minPrice, setMinPrice] = useState<number | ''>('');
   const [maxPrice, setMaxPrice] = useState<number | ''>('');
   const [minSize, setMinSize] = useState<number | ''>('');
@@ -83,10 +86,28 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
     setMaxPrice('');
     setMinSize('');
     setMaxSize('');
+    setSearchQuery('');
     try {
       localStorage.removeItem(FILTERS_KEY);
     } catch (e) {}
     if (onFiltersChange) onFiltersChange({});
+  };
+
+  const handleSearch = () => {
+    const filters: Filters = {
+      minPrice: typeof minPrice === 'number' ? minPrice : null,
+      maxPrice: typeof maxPrice === 'number' ? maxPrice : null,
+      minSize: typeof minSize === 'number' ? minSize : null,
+      maxSize: typeof maxSize === 'number' ? maxSize : null,
+      searchQuery: searchQuery || null,
+    };
+    if (onFiltersChange) onFiltersChange(filters);
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   const handlePriceClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -182,6 +203,55 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
           width: '100%',
         }}
       >
+        <TextField
+          placeholder="Search by address or county..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={handleSearchKeyPress}
+          size="small"
+          slotProps={{
+            input: {
+              endAdornment: (
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={handleSearch}
+                  sx={{
+                    minWidth: 'auto',
+                    padding: '4px 8px',
+                    color: 'rgba(25, 118, 210, 0.5)',
+                    '&:hover': {
+                      color: '#1976d2',
+                    },
+                  }}
+                >
+                  <SearchIcon fontSize="small" />
+                </Button>
+              ),
+            },
+          }}
+          sx={{
+            width: '250px',
+            backgroundColor: '#f0f4f4',
+            borderRadius: '999px',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '999px',
+              paddingRight: '4px',
+              borderColor: 'rgba(25, 118, 210, 0.5)',
+              color: '#1976d2',
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#1976d2',
+              },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#1976d2',
+              },
+            },
+            '& .MuiOutlinedInput-notchedOutline': {
+              borderColor: 'rgba(25, 118, 210, 0.5)',
+              
+            },
+          }}
+        />
         <Box sx={{ flex: 1, display: 'flex', gap: 1, justifyContent: 'flex-start' }}>
           <Button
             variant="outlined"

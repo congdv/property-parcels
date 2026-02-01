@@ -16,6 +16,7 @@ export const CLUSTER_TILE_SQL = `
     AND ($6::numeric IS NULL OR t.total_value <= $6::numeric)
     AND ($7::numeric IS NULL OR t.sqft >= $7::numeric)
     AND ($8::numeric IS NULL OR t.sqft <= $8::numeric)
+    AND ($9::text IS NULL OR t.address ILIKE '%' || $9::text || '%' OR t.county ILIKE '%' || $9::text || '%')
   ),
   clustered_points AS (
     SELECT 
@@ -65,6 +66,7 @@ export const PARCEL_TILE_SQL = `
       AND ($6::numeric IS NULL OR p.total_value <= $6::numeric)
       AND ($7::numeric IS NULL OR p.sqft >= $7::numeric)
       AND ($8::numeric IS NULL OR p.sqft <= $8::numeric)
+      AND ($9::text IS NULL OR p.address ILIKE '%' || $9::text || '%' OR p.county ILIKE '%' || $9::text || '%')
   )
   SELECT public.ST_AsMVT(mvt_geom.*, 'parcel-layer') AS mvt FROM mvt_geom;
 `;
@@ -95,4 +97,5 @@ export const LIST_PARCELS_FILTER_SQL = `
     AND ($3::numeric IS NULL OR p.total_value <= $3::numeric)
     AND ($4::numeric IS NULL OR p.sqft >= $4::numeric)
     AND ($5::numeric IS NULL OR p.sqft <= $5::numeric)
+    AND ($6::text IS NULL OR p.address ILIKE '%' || $6::text || '%' OR p.county ILIKE '%' || $6::text || '%')
 `;

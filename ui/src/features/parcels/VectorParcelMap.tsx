@@ -133,6 +133,7 @@ const VectorParcelMap: React.FC<{
     if (f?.maxPrice != null) params.set('maxPrice', String(f.maxPrice));
     if (f?.minSize != null) params.set('minSize', String(f.minSize));
     if (f?.maxSize != null) params.set('maxSize', String(f.maxSize));
+    if (f?.searchQuery) params.set('searchQuery', String(f.searchQuery));
     const qs = params.toString();
     return `${API_BASE_URL}/parcels/{z}/{x}/{y}${qs ? `?${qs}` : ''}`;
   };
