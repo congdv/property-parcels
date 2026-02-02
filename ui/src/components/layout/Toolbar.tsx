@@ -30,7 +30,7 @@ function formatLabel(min: number | null | undefined, max: number | null | undefi
     if ((max != null && max !== 10000 ) || (min != null && min !== 0)) {
       min = min ?? 0;
       max = max ?? 10000;
-      return `\$${min.toLocaleString()} - \$${max.toLocaleString()}`
+      return `${min.toLocaleString()} sq ft - ${max.toLocaleString()} sq ft`
     }
     return 'Size'
   }
@@ -392,7 +392,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
               }}
             >
               <Typography sx={{ fontWeight: 600 }}>
-                {sizeSliderValue[0].toLocaleString()}
+                {sizeSliderValue[0].toLocaleString()} sq ft 
               </Typography>
             </Box>
             <Box sx={{ flex: 1 }}>
@@ -415,7 +415,7 @@ const Toolbar: React.FC<{ initialFilters?: Filters; onFiltersChange?: (f: Filter
               }}
             >
               <Typography sx={{ fontWeight: 600 }}>
-                {sizeSliderValue[1] >= 10000 ? '10,000+' : `${sizeSliderValue[1].toLocaleString()}`}
+                {sizeSliderValue[1] >= 10000 ? '10,000+' : `${sizeSliderValue[1].toLocaleString()}`} sq ft 
               </Typography>
             </Box>
           </Box>
