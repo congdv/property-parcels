@@ -7,11 +7,12 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "format": "prettier --write .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -26,6 +27,7 @@
     "react-oidc-context": "^3.3.0"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.26.1",
     "@eslint/js": "^9.39.1",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.3.2",
@@ -45,6 +47,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",
-    "vitest": "^1.0.4"
+    "vitest": "^1.0.4",
+    "wrangler": "^4.71.0"
   }
 }
